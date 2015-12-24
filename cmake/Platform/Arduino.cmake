@@ -1477,7 +1477,7 @@ endfunction()
 #
 #       VAR_NAME - Variable name where the detected version will be saved
 #
-# Detects the Arduino SDK Version based on the revisions.txt file. The
+# Detects the Arduino SDK Version based on the lib/versions.txt file. The
 # following variables will be generated:
 #
 #    ${VAR_NAME}         -> the full version (major.minor.patch)
@@ -2237,7 +2237,7 @@ if(NOT ARDUINO_FOUND AND ARDUINO_SDK_PATH)
     set(ARDUINO_SDK_VERSION_PATCH ${ARDUINO_SDK_VERSION_PATCH} CACHE STRING "Arduino SDK Patch Version")
 
     if(ARDUINO_SDK_VERSION VERSION_LESS 0.19)
-         message(FATAL_ERROR "Unsupported Arduino SDK (require verion 0.19 or higher)")
+         message(FATAL_ERROR "Unsupported Arduino SDK (require version 0.19 or higher)")
     endif()
 
     message(STATUS "Arduino SDK version ${ARDUINO_SDK_VERSION}: ${ARDUINO_SDK_PATH}")
