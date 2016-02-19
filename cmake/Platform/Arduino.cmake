@@ -1299,6 +1299,7 @@ endfunction()
 function(setup_arduino_bootloader_upload TARGET_NAME BOARD_ID PORT AVRDUDE_FLAGS)
   set(UPLOAD_TARGET ${TARGET_NAME}-upload)
   set(AVRDUDE_ARGS)
+  set(DEPENDS)
 
   setup_arduino_bootloader_args(${BOARD_ID} ${TARGET_NAME} ${PORT} "${AVRDUDE_FLAGS}" AVRDUDE_ARGS)
 
@@ -1314,10 +1315,34 @@ function(setup_arduino_bootloader_upload TARGET_NAME BOARD_ID PORT AVRDUDE_FLAGS
 
   list(APPEND AVRDUDE_ARGS "-Uflash:w:${TARGET_PATH}.hex:i")
   list(APPEND AVRDUDE_ARGS "-Ueeprom:w:${TARGET_PATH}.eep:i")
+
+  list(APPEND DEPENDS ${TARGET_NAME})
+
+  if (RESET_PROGRAM AND (DEFINED ${TARGET_NAME}_RESET))
+    set(RESET_TARGET ${TARGET_NAME}-reset)
+    set(RESET_ARGS)
+
+    if (RESET_SCRIPT)
+      list(APPEND RESET_ARGS ${RESET_SCRIPT})
+    endif ()
+
+    if (${TARGET_NAME}_RESET)
+      list(APPEND RESET_ARGS "--${${TARGET_NAME}_RESET}")
+    endif ()
+    list(APPEND RESET_ARGS "--verbose")
+    list(APPEND RESET_ARGS "${PORT}")
+
+    add_custom_target(${RESET_TARGET}
+        ${RESET_PROGRAM}
+        ${RESET_ARGS})
+
+    list(APPEND DEPENDS ${RESET_TARGET})
+  endif ()
+
   add_custom_target(${UPLOAD_TARGET}
       ${ARDUINO_AVRDUDE_PROGRAM}
       ${AVRDUDE_ARGS}
-      DEPENDS ${TARGET_NAME})
+      DEPENDS ${DEPENDS})
 
   # Global upload target
   if (NOT TARGET upload)

@@ -15,5 +15,13 @@ set(${PROJECT_NAME}_SRCS example.cpp)
 # Define the port for uploading code to the Arduino
 set(${PROJECT_NAME}_PORT COM6)
 
+# Reset options
+#
+# Reset with DTR signal
+# set(${PROJECT_NAME}_RESET "")
+
+# Reset with DTR signal
+# set(${PROJECT_NAME}_RESET "caterina")
+
 # Command to generate code arduino firmware (.hex file)
 generate_arduino_firmware(${PROJECT_NAME})
