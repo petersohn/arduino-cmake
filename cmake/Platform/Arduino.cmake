@@ -350,6 +350,7 @@ function(PRINT_BOARD_SETTINGS ARDUINO_BOARD)
   endif ()
 endfunction()
 
+
 #=============================================================================#
 # [PUBLIC/USER]
 # see documentation at top
@@ -369,6 +370,10 @@ function(GENERATE_ARDUINO_LIBRARY INPUT_NAME)
   if (INPUT_CPU)
     set(${INPUT_BOARD}_CPUMENU "${INPUT_BOARD}.menu.cpu.${INPUT_CPU}")
   endif (INPUT_CPU)
+
+  if (NOT ${INPUT_BOARD}_CPUMENU)
+    set(${INPUT_BOARD}_CPUMENU "${INPUT_BOARD}")
+  endif ()
 
   if (NOT INPUT_MANUAL)
     set(INPUT_MANUAL FALSE)
@@ -425,6 +430,10 @@ function(GENERATE_AVR_LIBRARY INPUT_NAME)
     set(${INPUT_BOARD}_CPUMENU "${INPUT_BOARD}.menu.cpu.${INPUT_CPU}")
   endif (INPUT_CPU)
 
+  if (NOT ${INPUT_BOARD}_CPUMENU)
+    set(${INPUT_BOARD}_CPUMENU "${INPUT_BOARD}")
+  endif ()
+
   required_variables(VARS INPUT_SRCS INPUT_BOARD MSG "must define for target ${INPUT_NAME}")
 
   if (INPUT_HDRS)
@@ -471,6 +480,10 @@ function(GENERATE_ARDUINO_FIRMWARE INPUT_NAME)
   if (INPUT_CPU)
     set(${INPUT_BOARD}_CPUMENU "${INPUT_BOARD}.menu.cpu.${INPUT_CPU}")
   endif (INPUT_CPU)
+
+  if (NOT ${INPUT_BOARD}_CPUMENU)
+    set(${INPUT_BOARD}_CPUMENU "${INPUT_BOARD}")
+  endif ()
 
   if (NOT INPUT_PORT)
     set(INPUT_PORT ${ARDUINO_DEFAULT_PORT})
@@ -556,6 +569,10 @@ function(GENERATE_AVR_FIRMWARE INPUT_NAME)
     set(${INPUT_BOARD}_CPUMENU "${INPUT_BOARD}.menu.cpu.${INPUT_CPU}")
   endif (INPUT_CPU)
 
+  if (NOT ${INPUT_BOARD}_CPUMENU)
+    set(${INPUT_BOARD}_CPUMENU "${INPUT_BOARD}")
+  endif ()
+
   if (NOT INPUT_PORT)
     set(INPUT_PORT ${ARDUINO_DEFAULT_PORT})
   endif ()
@@ -611,6 +628,10 @@ function(GENERATE_ARDUINO_EXAMPLE INPUT_NAME)
   if (INPUT_CPU)
     set(${INPUT_BOARD}_CPUMENU "${INPUT_BOARD}.menu.cpu.${INPUT_CPU}")
   endif (INPUT_CPU)
+
+  if (NOT ${INPUT_BOARD}_CPUMENU)
+    set(${INPUT_BOARD}_CPUMENU "${INPUT_BOARD}")
+  endif ()
 
   if (NOT INPUT_PORT)
     set(INPUT_PORT ${ARDUINO_DEFAULT_PORT})
@@ -806,6 +827,39 @@ endfunction()
 #=============================================================================#
 # [PRIVATE/INTERNAL]
 #
+# RESOLVE_REFERABLE_PATH(VAR_NAME TARGET TYPE)
+#
+#
+#=============================================================================#
+function(RESOLVE_REFERABLE_PATH VAR_NAME TARGET TYPE)
+  string(REPLACE ":" ";" TARGETS ${TARGET})
+  list(LENGTH TARGETS len)
+  if (len GREATER 1)
+
+    list(GET TARGETS 0 vendor)
+    list(GET TARGETS 1 core_id)
+
+    # TODO should find a better way to do this
+    # init type maps
+    set(core cores)
+    set(variant variants)
+
+    set(PATH ${ARDUINO_SDK_PATH}/hardware/${vendor}/avr/${${TYPE}}/${core_id})
+  else ()
+    set(PATH ${${TARGET}_${TYPE}.path})
+  endif ()
+
+  if (NOT PATH)
+    message(FATAL_ERROR "Can not resolve ${TYPE} ${TARGET}")
+  endif ()
+
+  set(${VAR_NAME} ${PATH} PARENT_SCOPE)
+endfunction()
+
+
+#=============================================================================#
+# [PRIVATE/INTERNAL]
+#
 # get_arduino_flags(COMPILE_FLAGS LINK_FLAGS BOARD_ID MANUAL)
 #
 #       COMPILE_FLAGS_VAR -Variable holding compiler flags
@@ -819,6 +873,9 @@ endfunction()
 function(get_arduino_flags COMPILE_FLAGS_VAR LINK_FLAGS_VAR BOARD_ID MANUAL)
   set(BOARD_CORE ${${BOARD_ID}.build.core})
   if (BOARD_CORE)
+    RESOLVE_REFERABLE_PATH(BOARD_CORE_PATH ${${BOARD_ID}.build.core} "core")
+    RESOLVE_REFERABLE_PATH(BOARD_VARIANT_PATH ${${BOARD_ID}.build.variant} "variant")
+
     if (ARDUINO_SDK_VERSION MATCHES "([0-9]+)[.]([0-9]+)[.]([0-9]+)")
       string(REPLACE "." "" ARDUINO_VERSION_DEFINE "${ARDUINO_SDK_VERSION}") # Normalize version (remove all periods)
       set(ARDUINO_VERSION_DEFINE "")
@@ -861,12 +918,12 @@ function(get_arduino_flags COMPILE_FLAGS_VAR LINK_FLAGS_VAR BOARD_ID MANUAL)
       set(COMPILE_FLAGS "${COMPILE_FLAGS} -DUSB_PID=${${BOARD_ID}.build.pid}")
     endif ()
     if (NOT MANUAL)
-      set(COMPILE_FLAGS "${COMPILE_FLAGS} -I\"${${BOARD_CORE}_core.path}\" -I\"${ARDUINO_LIBRARIES_PATH}\"")
+      set(COMPILE_FLAGS "${COMPILE_FLAGS} -I\"${BOARD_CORE_PATH}\" -I\"${ARDUINO_LIBRARIES_PATH}\"")
     endif ()
     set(LINK_FLAGS "-mmcu=${${${BOARD_ID}_CPUMENU}.build.mcu}")
     if (ARDUINO_SDK_VERSION VERSION_GREATER 1.0 OR ARDUINO_SDK_VERSION VERSION_EQUAL 1.0)
       if (NOT MANUAL)
-        set(PIN_HEADER ${${${BOARD_ID}.build.variant}_variant.path})
+        set(PIN_HEADER ${BOARD_VARIANT_PATH})
         if (PIN_HEADER)
           set(COMPILE_FLAGS "${COMPILE_FLAGS} -I\"${PIN_HEADER}\"")
         endif ()
@@ -898,8 +955,10 @@ function(setup_arduino_core VAR_NAME BOARD_ID)
   set(CORE_LIB_NAME ${BOARD_ID}_CORE)
   set(BOARD_CORE ${${BOARD_ID}.build.core})
   if (BOARD_CORE)
+    RESOLVE_REFERABLE_PATH(BOARD_CORE_PATH ${BOARD_CORE} "core")
+
     if (NOT TARGET ${CORE_LIB_NAME})
-      set(BOARD_CORE_PATH ${${BOARD_CORE}_core.path})
+      set(BOARD_CORE_PATH ${BOARD_CORE_PATH})
       find_sources(CORE_SRCS ${BOARD_CORE_PATH} True)
       # Debian/Ubuntu fix
       list(REMOVE_ITEM CORE_SRCS "${BOARD_CORE_PATH}/main.cxx")
