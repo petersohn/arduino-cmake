@@ -6,11 +6,28 @@
 #                                                                             #
 #=============================================================================#
 
-# this line is needed only if you use boards with selectable cpu (like mega, pro etc)
-# and this line should go before call to "cmake/ArduinoToolchain.cmake"
-# this is durty hack and should be fixed somewhen, because it should go to 
-# particular cmake subdirectory
-set(ARDUINO_CPU 16MHzatmega328)
+# Initialize hardware options
+#
+# -------------------------------------------------------------------
+# Set arduino hardware path
+#
+#   default is ${ARDUINO_SDK_PATH}/hardware
+#
+# set(ARDUINO_HARDWARE_PATH $ENV{HOME}/Documents/Arduino/hardware)
+
+# -------------------------------------------------------------------
+# Set arduino hardware vendor
+#
+#   default is arduino
+#
+# set(ARDUINO_HARDWARE_VENDOR arduino)
+
+# -------------------------------------------------------------------
+# Set arduino platform
+#
+#   default is AVR
+#
+# set(ARDUINO_PLATFORM AVR)
 
 set(CMAKE_TOOLCHAIN_FILE cmake/ArduinoToolchain.cmake) # Arduino Toolchain
 

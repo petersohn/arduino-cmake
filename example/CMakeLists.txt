@@ -6,6 +6,9 @@ project(${PROJECT_NAME} C CXX)
 
 set(${PROJECT_NAME}_BOARD pro)
 
+# Set CPU
+set(${PROJECT_NAME}_CPU 16MHzatmega328)
+
 # Define the source code
 set(${PROJECT_NAME}_SRCS example.cpp)
 
