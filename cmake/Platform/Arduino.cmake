@@ -817,7 +817,7 @@ function(get_arduino_flags COMPILE_FLAGS_VAR LINK_FLAGS_VAR BOARD_ID MANUAL)
         endif()
 
         # output
-        set(COMPILE_FLAGS "-DF_CPU=${${BOARD_ID}.build.f_cpu} -DARDUINO=${ARDUINO_VERSION_DEFINE} -mmcu=${${BOARD_ID}${ARDUINO_CPUMENU}.build.mcu}")
+	set(COMPILE_FLAGS "-DF_CPU=${${BOARD_ID}.build.f_cpu} -DARDUINO=${ARDUINO_VERSION_DEFINE} -mmcu=${${BOARD_ID}${ARDUINO_CPUMENU}.build.mcu} '-DUSB_PRODUCT=\"${${BOARD_ID}.name}\"'")
         if(DEFINED ${BOARD_ID}.build.vid)
             set(COMPILE_FLAGS "${COMPILE_FLAGS} -DUSB_VID=${${BOARD_ID}.build.vid}")
         endif()
