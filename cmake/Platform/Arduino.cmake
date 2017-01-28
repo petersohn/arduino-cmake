@@ -935,7 +935,7 @@ function(find_arduino_libraries VAR_NAME SRCS ARDLIBS)
                     get_property(LIBRARY_SEARCH_PATH
                                  DIRECTORY     # Property Scope
                                  PROPERTY LINK_DIRECTORIES)
-                    foreach(LIB_SEARCH_PATH ${LIBRARY_SEARCH_PATH} ${ARDUINO_LIBRARIES_PATH} ${${ARDUINO_PLATFORM}_LIBRARIES_PATH} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libraries ${ARDUINO_EXTRA_LIBRARIES_PATH})
+                    foreach(LIB_SEARCH_PATH ${LIBRARY_SEARCH_PATH} ${ARDUINO_LIBRARIES_PATH} ${${ARDUINO_PLATFORM}_LIBRARIES_PATH} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/libraries ${ARDUINO_EXTRA_LIBRARIES_PATH} )
                         if(EXISTS ${LIB_SEARCH_PATH}/${INCLUDE_NAME}/${CMAKE_MATCH_1})
                             list(APPEND ARDUINO_LIBS ${LIB_SEARCH_PATH}/${INCLUDE_NAME})
                             break()
@@ -944,10 +944,10 @@ function(find_arduino_libraries VAR_NAME SRCS ARDLIBS)
                             list(APPEND ARDUINO_LIBS ${LIB_SEARCH_PATH}/${INCLUDE_NAME})
                             break()
                         endif()
-                        if(EXISTS ${LIB_SEARCH_PATH}/${CMAKE_MATCH_1})
-                            list(APPEND ARDUINO_LIBS ${LIB_SEARCH_PATH})
-                            break()
-                        endif()
+                        # if(EXISTS ${LIB_SEARCH_PATH}/${CMAKE_MATCH_1})
+                        #     list(APPEND ARDUINO_LIBS ${LIB_SEARCH_PATH})
+                        #     break()
+                        # endif()
                     endforeach()
                 endif()
             endforeach()
@@ -1084,7 +1084,7 @@ endfunction()
 #=============================================================================#
 # [PRIVATE/INTERNAL]
 #
-# setup_arduino_target(TARGET_NAME ALL_SRCS ALL_LIBS COMPILE_FLAGS LINK_FLAGS MANUAL)
+# setup_arduino_target(TARGET_NAME BOARD_ID ALL_SRCS ALL_LIBS COMPILE_FLAGS LINK_FLAGS MANUAL)
 #
 #        TARGET_NAME - Target name
 #        BOARD_ID    - Arduino board ID
